@@ -1,5 +1,7 @@
 package PAXOS;
 
+import com.healthmarketscience.rmiio.RemoteInputStream;
+import com.healthmarketscience.rmiio.RemoteInputStreamServer;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
@@ -16,8 +18,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-//TODO: NEED TO ADD TO PARAMS DATABASE NAME TO RETRIEVE FROM GIVEN DATABASE
-
 public class Crud extends java.rmi.server.UnicastRemoteObject implements ICrud{
 
     public Crud() throws RemoteException {
@@ -25,16 +25,20 @@ public class Crud extends java.rmi.server.UnicastRemoteObject implements ICrud{
     }
 
     @Override
-    public ObjectId upload(InputStream inputStream, String fileName) throws RemoteException {
+    public ObjectId upload(RemoteInputStream inputStream, String fileName, String databaseName) throws RemoteException {
         System.out.println("Calling upload...");
-        MongoClient mongoClient = MongoClients.create("mongodb+srv://testUser:testUser@server1.w54b6.mongodb.net/firstDb?retryWrites=true&w=majority");
+        String con = String.format("mongodb+srv://testUser:testUser@server1." +
+                "w54b6.mongodb.net/%s?retryWrites=true&w=majority", databaseName);
+        MongoClient mongoClient = MongoClients.create(con);
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
         ObjectId fileId = null;
         try {
-            MongoDatabase database = mongoClient.getDatabase("firstDb");
+            MongoDatabase database = mongoClient.getDatabase(databaseName);
             GridFSBucket gridBucket = GridFSBuckets.create(database);
-            GridFSUploadOptions uploadOptions = new GridFSUploadOptions().chunkSizeBytes(1024).metadata(new Document("type", "image").append("upload_date", format.parse("2016-09-01T00:00:00Z")).append("content_type", "image/jpg"));
-            fileId = gridBucket.uploadFromStream(fileName, inputStream, uploadOptions);
+            GridFSUploadOptions uploadOptions = new GridFSUploadOptions().chunkSizeBytes(1024).
+                    metadata(new Document("type", "image").append("upload_date", format.parse("2016-09-01T00:00:00Z")).
+                            append("content_type", "image/jpg"));
+            fileId = gridBucket.uploadFromStream(fileName, (InputStream) inputStream, uploadOptions);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -45,12 +49,14 @@ public class Crud extends java.rmi.server.UnicastRemoteObject implements ICrud{
     }
 
     @Override
-    public void download(String fileName, String outputString) throws RemoteException {
+    public void download(String fileName, String outputString, String databaseName) throws RemoteException {
         System.out.println("Calling download...");
-        MongoClient mongoClient = MongoClients.create("mongodb+srv://testUser:testUser@server1.w54b6.mongodb.net/firstDb?retryWrites=true&w=majority");
+        String con = String.format("mongodb+srv://testUser:testUser@server1." +
+                "w54b6.mongodb.net/%s?retryWrites=true&w=majority", databaseName);
+        MongoClient mongoClient = MongoClients.create(con);
 
         try {
-            MongoDatabase database = mongoClient.getDatabase("firstDb");
+            MongoDatabase database = mongoClient.getDatabase(databaseName);
             GridFSBucket gridBucket = GridFSBuckets.create(database);
 
             FileOutputStream fileOutputStream = new FileOutputStream(fileName);
@@ -65,11 +71,13 @@ public class Crud extends java.rmi.server.UnicastRemoteObject implements ICrud{
     }
 
     @Override
-    public void delete(ObjectId objectId) throws RemoteException {
+    public void delete(ObjectId objectId, String databaseName) throws RemoteException {
         System.out.println("Calling delete...");
-        MongoClient mongoClient = MongoClients.create("mongodb+srv://testUser:testUser@server1.w54b6.mongodb.net/firstDb?retryWrites=true&w=majority");
+        String con = String.format("mongodb+srv://testUser:testUser@server1." +
+                "w54b6.mongodb.net/%s?retryWrites=true&w=majority", databaseName);
+        MongoClient mongoClient = MongoClients.create(con);
         try {
-            MongoDatabase database = mongoClient.getDatabase("firstDb");
+            MongoDatabase database = mongoClient.getDatabase(databaseName);
             GridFSBucket gridBucket = GridFSBuckets.create(database);
             gridBucket.delete(objectId);
         } catch (Exception e) {

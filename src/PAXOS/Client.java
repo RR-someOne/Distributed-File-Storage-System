@@ -1,5 +1,9 @@
 package PAXOS;
 
+import com.healthmarketscience.rmiio.RemoteInputStream;
+import com.healthmarketscience.rmiio.RemoteInputStreamServer;
+import com.healthmarketscience.rmiio.SimpleRemoteInputStream;
+
 import java.io.*;
 import java.rmi.NotBoundException;
 import java.rmi.registry.LocateRegistry;
@@ -15,12 +19,16 @@ public class Client {
     private final static Logger LOGGER = Logger.getLogger(Client.class.getName());
     private static String hostName;
     private static int portNumber;
-    private static String filePath;
+    private static int cordPortNumber;
+  //  private static String filePath;
     private static String coordName;
+   // private static InputStream file;
 
-    public InputStream parseFilePath(String filePath) throws FileNotFoundException {
+    // Wrapper to send input stream file, normal inputstream does not work here for rmi...
+    public static RemoteInputStreamServer parseFilePath(String filePath) throws FileNotFoundException {
         InputStream inputStream = new FileInputStream(new File(filePath));
-        return inputStream;
+        RemoteInputStreamServer remoteFileData = new SimpleRemoteInputStream(inputStream);
+        return remoteFileData;
     }
 
     public static void welcomeMessage(){
@@ -48,13 +56,16 @@ public class Client {
         try {
             hostName = args[0].toString();
             portNumber = Integer.parseInt(args[1]);
-            filePath = args[2].toString();
-            coordName = args[3].toString();
+            //filePath = args[2].toString();
+            coordName = args[2].toString();
+            cordPortNumber = Integer.parseInt(args[3]);
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
+            LOGGER.info("Illegal arguments.");
+            System.out.println("Illegal arguments. (hostName, port number, file path, coordName)");
         }
         try {
-            Registry registry = LocateRegistry.getRegistry(hostName, portNumber);
+            Registry registry = LocateRegistry.getRegistry(hostName, cordPortNumber);
             ICordinator coordinator = (ICordinator) registry.lookup(coordName);
             while(true) {
                 welcomeMessage();
@@ -67,6 +78,14 @@ public class Client {
                 switch (request.toLowerCase()) {
                     case "upload":
                         //TODO: Get file Input stream send to coordinator for upload.
+                        System.out.println("Enter a file path for to upload to server.");
+                        String filePath = in.nextLine();
+                        System.out.println("Now enter the fileName for the file.");
+                        String fileName = in.nextLine();
+                     //   InputStream file = parseFilePath(filePath);
+                        RemoteInputStreamServer file = parseFilePath(filePath);
+                        coordinator.uploadImageRequest(file.export(), fileName);
+                        // LEFT OFF HERE...
                         break;
                     case "download":
                         // TODO: send file name to download and send the file path to store the image.
@@ -77,7 +96,7 @@ public class Client {
                 }
 
             }
-        } catch (NotBoundException e) {
+       } catch (NotBoundException e) {
             System.out.println("The coordinator is not bound. Please try again.");
         }
     }

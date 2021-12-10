@@ -1,45 +1,133 @@
 package PAXOS;
 
+import com.healthmarketscience.rmiio.RemoteInputStream;
+import com.healthmarketscience.rmiio.RemoteInputStreamServer;
+
+import java.io.InputStream;
+import java.rmi.NotBoundException;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.util.ArrayList;
+import java.util.logging.Logger;
+
 public class Coordinator extends java.rmi.server.UnicastRemoteObject implements ICordinator{
 
+    private final static Logger LOGGER = Logger.getLogger(Coordinator.class.getName());
+    private ArrayList<String> serverNames = new ArrayList<>();
+    private ICrud crudOperations;
+    private ArrayList<String> hostNames = new ArrayList<>();
+    private ArrayList<Integer> portNumbers = new ArrayList<>();
+    private ArrayList<IServer> servers = new ArrayList<>();
+    private final String UPLOAD = "upload";
+    private final String DOWNLOAD = "download";
+    private final String DELETE = "delete";
+    // TODO: NEED TO RESET THE MESSAGES ARRAY AFTER DONE WITH PHASE 1
+    private ArrayList<String> messages = new ArrayList<>();
 
-    public Coordinator() throws java.rmi.RemoteException{
+    public Coordinator() throws RemoteException {
         super();
+        crudOperations = new Crud();
     }
 
 
     @Override
-    public void phase_one() {
+    public void phase_one(String requestType, RemoteInputStream file, String fileName) throws RemoteException{
+        // Need to send a message to all servers
+        for(int i = 0; i < serverNames.size(); i ++ ) {
+            try{
+                Registry registry = LocateRegistry.getRegistry(hostNames.get(i), portNumbers.get(i));
+                IServer server = (IServer) registry.lookup(serverNames.get(i));
+                servers.add(server);
+            } catch (NotBoundException e) {
+                e.printStackTrace();
+                System.out.println("Registry is not bound from the coordinator phase one.");
+            } catch(RemoteException e) {
+                e.printStackTrace();
+                System.out.println("Coordinator throws a remote exception from phase one.");
+            }
+        }
+        // Send a message to each server and check all responses for ok messages.
+        for(IServer server : servers) {
+            server.sendMessageToCoordinator("From server: " + server.getServerName(),
+                    UPLOAD, file, fileName);
+        }
+        if(messages.contains("ABORT") || messages.size() != portNumbers.size()) {
+            LOGGER.info("PHASE 1 WAS ABORTED.");
+            messages.clear();
+            // Rememeber to also clear servers.
+            servers.clear();
+        } else {
+            LOGGER.info("PHASE 1 WAS SUCCESS.");
+            // Start phase 2
+            phase_two(requestType, file, fileName);
+            messages.clear();
+            // Rememeber to also clear servers.
+            servers.clear();
+        }
+    }
+
+    @Override
+    public void phase_two(String requestType, RemoteInputStream file, String fileName) throws RemoteException{
+        switch (requestType) {
+            case UPLOAD:
+                for(IServer server: servers) {
+                    try {
+                        server.uploadToServer(file, fileName);
+                    } catch (Error e) {
+                        LOGGER.info("Send upload request to the server failed.");
+                        // TODO: NEED TO ADD A ROLL BACK FEATURE IN CASE A SERVER FAILS AFTER PHASE 1
+                        break;
+                    }
+                }
+                break;
+            case DOWNLOAD:
+                break;
+            case DELETE:
+                break;
+        }
+    }
+
+    @Override
+    public void uploadImageRequest(RemoteInputStream file, String fileName) throws RemoteException {
+        // Start phase one here
+        phase_one(UPLOAD, file, fileName);
+    }
+
+    @Override
+    public void downloadImageRequest() throws RemoteException {
+        // Does not change state so does not need 2 phase commit
+    }
+
+    @Override
+    public void deleteImageRequest() throws RemoteException {
+        // Start phase one here
+    }
+
+    @Override
+    public void messageBackToClient() throws RemoteException {
 
     }
 
     @Override
-    public void phase_two() {
+    public void findObjectId() throws RemoteException{
 
     }
 
     @Override
-    public void messageBackToClient() {
-
+    public void sendServerNameAndHostName(String serverName, String hostName) throws RemoteException {
+        serverNames.add(serverName);
+        hostNames.add(hostName);
     }
 
     @Override
-    public void messageToServerUpload() {
-
+    public void sendPortNumber(Integer portNumber) throws RemoteException {
+        portNumbers.add(portNumber);
     }
 
     @Override
-    public void messageToServerDelete() {
-
-    }
-
-    @Override
-    public void messageToServerDownload() {
-
-    }
-
-    @Override
-    public void findObjectId() {
-
+    public void sendBackMessageToCoordintor(String message) throws RemoteException {
+        messages.add(message);
     }
 }
