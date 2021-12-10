@@ -1,0 +1,36 @@
+package PAXOS;
+
+import org.bson.types.ObjectId;
+
+import java.io.InputStream;
+import java.rmi.RemoteException;
+
+public interface ICrud extends java.rmi.Remote{
+
+    /**
+     * Uploads an image to the database.
+     *
+     * @param inputStream Inputstream file.
+     * @param fileName String file name.
+     * @return ObjectId of the file uploaded.
+     * @throws RemoteException throws a remote exception.
+     */
+    public ObjectId upload(InputStream inputStream, String fileName) throws RemoteException;
+
+    /**
+     * Downloads an image from the database.
+     *
+     * @param fileName String filename.
+     * @param outputString String output file path.
+     * @throws RemoteException throws a remote exception.
+     */
+    public void download(String fileName, String outputString) throws RemoteException;
+
+    /**
+     * Deletes an image from the database.
+     *
+     * @param objectId Objectid of image.
+     * @throws RemoteException throws a remote excepion.
+     */
+    public void delete(ObjectId objectId) throws RemoteException;
+}
