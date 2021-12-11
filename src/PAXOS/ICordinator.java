@@ -12,76 +12,95 @@ import java.rmi.RemoteException;
 public interface ICordinator extends Remote {
 
     /**
-     * Phase one of two phase commit for upload.
+     * Phase one of two phase commit upload.
+     *
+     * @param requestType String request type.
+     * @param filePath String file path.
+     * @param fileName String filename.
+     * @throws RemoteException throws remote exception.
      */
     public void phase_one(String requestType, String filePath, String fileName) throws RemoteException;
 
+
     /**
-     * Phase one of twe phase commit for delete.
+     * Phase one of the two phase commit delete.
+     *
+     * @param requestType String request type.
+     * @param fileName String file path.
+     * @throws RemoteException throws remote exception.
      */
     public void phase_one_delete(String requestType, String fileName) throws RemoteException;
 
-
     /**
-     * Phase two of two phase commit.
+     * phase two of the two phase commit upload.
+     *
+     * @param requestType String request type.
+     * @param filePath String file path.
+     * @param fileName String filename.
+     * @throws RemoteException throws remote exception.
      */
     public void phase_two(String requestType, String filePath, String fileName) throws RemoteException;
 
     /**
+     * phase two of the two phase commit delete.
      *
-     * @param fileName
-     * @throws RemoteException
+     * @param fileName String file path.
+     * @throws RemoteException throws remote exception.
      */
     public void phaseTwoDelete(String fileName) throws RemoteException;
 
-
     /**
-     * sends an upload image request to coordinator.
+     * upload image request.
      *
-     * @throws RemoteException throws remote exception.
+     * @param filePath String file path.
+     * @param fileName String filename.
+     * @throws IOException throws io exception.
      */
-   // public void uploadImageRequest(RemoteInputStream file, String fileName) throws IOException;
-
     public void uploadImageRequest(String filePath, String fileName) throws IOException;
 
     /**
-     * sends an download image request to coordinator.
+     * download image request.
      *
+     * @param fileName String file path.
+     * @param filePathDownload String filePathDownload.
      * @throws RemoteException throws remote exception.
      */
     public void downloadImageRequest(String fileName, String filePathDownload) throws RemoteException;
 
     /**
-     * sends an delete image request to coordinator.
      *
-     * @throws RemoteException throws remote exception.
+     * @param deleteFileName
+     * @throws RemoteException
      */
     public void deleteImageRequest(String deleteFileName) throws RemoteException;
 
+
     /**
-     * Sends a message to the client.
+     *
+     * @throws RemoteException
      */
     public void messageBackToClient() throws RemoteException;
 
-    /**
-     * Find the objectId of an image.
-     */
-    public void findObjectId() throws RemoteException;
 
     /**
-     * Sends server name to the coordinator.
      *
-     * @throws RemoteException throws remote exception.
+     * @param serverName
+     * @param hostName
+     * @throws RemoteException
      */
     public void sendServerNameAndHostName(String serverName, String hostName) throws RemoteException;
 
     /**
-     * Sends a port number to the coorindator from server.
      *
-     * @param portNumber integer port number.
-     * @throws RemoteException throws a remote exception.
+     * @param portNumber
+     * @throws RemoteException
      */
     public void sendPortNumber(Integer portNumber) throws RemoteException;
 
+    /**
+     *
+     * @param message
+     * @throws RemoteException
+     */
     public void sendBackMessageToCoordintor(String message) throws RemoteException;
 }

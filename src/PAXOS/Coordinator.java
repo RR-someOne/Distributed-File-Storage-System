@@ -1,12 +1,7 @@
 package PAXOS;
 
-//import com.healthmarketscience.rmiio.RemoteInputStream;
-//import com.healthmarketscience.rmiio.RemoteInputStreamClient;
-//import com.healthmarketscience.rmiio.RemoteInputStreamServer;
-
 import java.io.*;
 import java.rmi.NotBoundException;
-//import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -24,7 +19,6 @@ public class Coordinator extends java.rmi.server.UnicastRemoteObject implements 
     private final String UPLOAD = "upload";
     private final String DOWNLOAD = "download";
     private final String DELETE = "delete";
-    // TODO: NEED TO RESET THE MESSAGES ARRAY AFTER DONE WITH PHASE 1
     private ArrayList<String> messages = new ArrayList<>();
 
     public Coordinator() throws RemoteException {
@@ -32,11 +26,8 @@ public class Coordinator extends java.rmi.server.UnicastRemoteObject implements 
         crudOperations = new Crud();
     }
 
-
-    //TODO: FAILED RMI SEND FILE BECAUSE USING SERVER RMI HERE
     @Override
     public void phase_one(String requestType, String filePath, String fileName) throws RemoteException{
-        // Need to send a message to all servers
         for(int i = 0; i < serverNames.size(); i ++ ) {
             try{
                 Registry registry = LocateRegistry.getRegistry(hostNames.get(i), portNumbers.get(i));
@@ -50,7 +41,6 @@ public class Coordinator extends java.rmi.server.UnicastRemoteObject implements 
                 System.out.println("Coordinator throws a remote exception from phase one.");
             }
         }
-        // Send a message to each server and check all responses for ok messages.
         for(IServer server : servers) {
             server.sendMessageToCoordinator("From server: " + server.getServerName(),
                     UPLOAD, filePath, fileName);
@@ -58,21 +48,17 @@ public class Coordinator extends java.rmi.server.UnicastRemoteObject implements 
         if(messages.contains("ABORT") || messages.size() != portNumbers.size()) {
             LOGGER.info("PHASE 1 WAS ABORTED.");
             messages.clear();
-            // Rememeber to also clear servers.
             servers.clear();
         } else {
             LOGGER.info("PHASE 1 WAS SUCCESS.");
-            // Start phase 2
             phase_two(requestType, filePath, fileName);
             messages.clear();
-            // Rememeber to also clear servers.
             servers.clear();
         }
     }
 
     @Override
     public void phase_one_delete(String requestType, String fileName) throws RemoteException {
-        // Need to send a message to all servers
         for(int i = 0; i < serverNames.size(); i ++ ) {
             try{
                 Registry registry = LocateRegistry.getRegistry(hostNames.get(i), portNumbers.get(i));
@@ -86,7 +72,6 @@ public class Coordinator extends java.rmi.server.UnicastRemoteObject implements 
                 System.out.println("Coordinator throws a remote exception from phase one.");
             }
         }
-        // Send a message to each server and check all responses for ok messages.
         for(IServer server : servers) {
             server.sendMessageToCoordinatorForDelete("From server: " + server.getServerName(),
                     fileName);
@@ -94,15 +79,11 @@ public class Coordinator extends java.rmi.server.UnicastRemoteObject implements 
         if(messages.contains("ABORT") || messages.size() != portNumbers.size()) {
             LOGGER.info("PHASE 1 WAS ABORTED.");
             messages.clear();
-            // Rememeber to also clear servers.
             servers.clear();
         } else {
             LOGGER.info("PHASE 1 WAS SUCCESS.");
-            // Start phase 2
             phaseTwoDelete(fileName);
-           // phase_two(requestType, filePath, fileName);
             messages.clear();
-            // Rememeber to also clear servers.
             servers.clear();
         }
     }
@@ -141,26 +122,14 @@ public class Coordinator extends java.rmi.server.UnicastRemoteObject implements 
         }
     }
 
-//    @Override
-//    public void uploadImageRequest(RemoteInputStream file, String fileName) throws IOException {
-//        // Start phase one here
-//        InputStream fileData = RemoteInputStreamClient.wrap(file);
-//        phase_one(UPLOAD, fileData, fileName);
-//    }
-
 
     @Override
     public void uploadImageRequest(String filePath, String fileName) throws IOException {
-        // Start phase one here
-        //InputStream fileData = RemoteInputStreamClient.wrap(file);
-       // InputStream file = new FileInputStream(new File(fileName));
-       // phase_one(UPLOAD, file, fileName);
         phase_one(UPLOAD, filePath, fileName);
     }
 
     @Override
     public void downloadImageRequest(String fileName, String downloadImagePath) throws RemoteException {
-        // Does not change state so does not need 2 phase commit
         for(int i = 0; i < serverNames.size(); i ++ ) {
             try{
                 Registry registry = LocateRegistry.getRegistry(hostNames.get(i), portNumbers.get(i));
@@ -182,17 +151,11 @@ public class Coordinator extends java.rmi.server.UnicastRemoteObject implements 
 
     @Override
     public void deleteImageRequest(String deleteFileName) throws RemoteException {
-        // Start phase one here
         phase_one_delete(DELETE, deleteFileName);
     }
 
     @Override
     public void messageBackToClient() throws RemoteException {
-
-    }
-
-    @Override
-    public void findObjectId() throws RemoteException{
 
     }
 

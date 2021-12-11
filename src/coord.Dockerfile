@@ -9,7 +9,7 @@ RUN javac -cp PAXOS/mongo-java-driver-3.11.2.jar: PAXOS/*.java
 #RUN javac -cp PAXOS/mongo-java-driver-3.11.2.jar: PAXOS/Client.java
 
 # cmd to run server locally - java server.ServerApp 1111 5555
-ENTRYPOINT ["java", "-cp"," PAXOS.mongo-java-driver-3.11.2.jar: ", "PAXOS.StartServer"]
+ENTRYPOINT ["java", "-cp"," PAXOS.mongo-java-driver-3.11.2.jar: ", "PAXOS.StartCoordindator"]
 
 
 

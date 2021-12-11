@@ -1,16 +1,9 @@
 package PAXOS;
 
-//import com.healthmarketscience.rmiio.RemoteInputStream;
-//import com.healthmarketscience.rmiio.RemoteInputStreamServer;
-//import jdk.swing.interop.SwingInterOpUtils;
-
 import org.bson.types.ObjectId;
 
 import java.io.*;
 import java.rmi.RemoteException;
-//import java.rmi.registry.LocateRegistry;
-//import java.rmi.registry.Registry;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
@@ -61,27 +54,6 @@ public class Server extends Crud implements Runnable, IServer, Serializable {
         }
     }
 
-
-//    @Override
-//    public void sendMessageToCoordinator(String message, String requestType,
-//                                         InputStream file, String fileName) throws RemoteException {
-//        switch (requestType) {
-//            case "upload":
-//                try {
-//                    upload(file, fileName, databaseName);
-//                    LOGGER.info("SUCCESS CAN UPLOAD FROM SERVER." + message);
-//                    cordinator.sendBackMessageToCoordintor("OK");
-//                }  catch (Error e) {
-//                    LOGGER.info("Aborted" + message);
-//                    cordinator.sendBackMessageToCoordintor("ABORT");
-//                }
-//                break;
-//            case "download":
-//                break;
-//            case "delete":
-//                break;
-//        }
-//    }
 
     @Override
     public String getServerName() throws RemoteException {

@@ -1,9 +1,5 @@
 package PAXOS;
 
-//import com.healthmarketscience.rmiio.RemoteInputStream;
-//import com.healthmarketscience.rmiio.RemoteInputStreamServer;
-//import com.healthmarketscience.rmiio.SimpleRemoteInputStream;
-
 import java.io.*;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -17,6 +13,10 @@ import java.util.logging.SimpleFormatter;
 
 public class Client implements Serializable{
 
+    /**
+     * Constructor for the client.
+     * @throws RemoteException
+     */
     public Client() throws RemoteException {
         super();
     }
@@ -25,29 +25,43 @@ public class Client implements Serializable{
     private static String hostName;
     private static int portNumber;
     private static int cordPortNumber;
-  //  private static String filePath;
     private static String coordName;
-   // private static InputStream file;
 
-    // Wrapper to send input stream file, normal inputstream does not work here for rmi...
+    /**
+     * Input Stream parser.
+     *
+     * @param filePath String file path.
+     * @return returns input stream.
+     * @throws FileNotFoundException throws file not found exception.
+     */
     public static InputStream parseFilePath(String filePath) throws FileNotFoundException {
         InputStream inputStream = new FileInputStream(new File(filePath));
-      //  RemoteInputStreamServer remoteFileData = new SimpleRemoteInputStream(inputStream);
         return inputStream;
     }
 
+    /**
+     * Welcome message of the client.
+     */
     public static void welcomeMessage(){
         System.out.println("******** Welcome to the client interface. ************\n\n" +
                 "Please choose a command from upload, download or delete.\n" +
                 "If you need help choosing, please enter the keyword help");
     }
 
+    /**
+     * help message of the client.
+     */
     public static void helpMessage() {
         System.out.println("PhotoDrop can support the following commands:\n\n" +
                 "Upload, Download, Delete \n" +
                 "Enter one of these commands.");
     }
 
+    /**
+     * Driver of the client.
+     * @param args user inputted args.
+     * @throws IOException throws input output exception.
+     */
     public static void main(String[] args) throws IOException {
         FileHandler fh = new FileHandler("myLogRmiClient.txt");
         fh.setLevel(Level.INFO);
@@ -61,7 +75,6 @@ public class Client implements Serializable{
         try {
             hostName = args[0].toString();
             portNumber = Integer.parseInt(args[1]);
-            //filePath = args[2].toString();
             coordName = args[2].toString();
             cordPortNumber = Integer.parseInt(args[3]);
         } catch (IllegalArgumentException e) {
@@ -82,26 +95,20 @@ public class Client implements Serializable{
                 }
                 switch (request.toLowerCase()) {
                     case "upload":
-                        //TODO: Get file Input stream send to coordinator for upload.
                         System.out.println("Enter a file path for to upload to server.");
                         String filePath = in.nextLine();
                         System.out.println("Now enter the fileName for the file.");
                         String fileName = in.nextLine();
-                     //   InputStream file = parseFilePath(filePath);
                         InputStream file = parseFilePath(filePath);
-                        //TEST HERE
                         try {
-                            //coordinator.uploadImageRequest(file.export(), fileName);
                             coordinator.uploadImageRequest(filePath, fileName);
                             System.out.println("SUCCESS test");
                         } catch (Error e) {
                             e.printStackTrace();
                             System.out.println("Failed test here!!! ");
                         }
-                        // LEFT OFF HERE...
                         break;
                     case "download":
-                        // TODO: send file name to download and send the file path to store the image.
                         System.out.println("Please enter the fileName for the file to download.");
                         String downloadFileName = in.nextLine();
                         System.out.println("Please enter the filePath to store on machine.");
@@ -109,7 +116,6 @@ public class Client implements Serializable{
                         coordinator.downloadImageRequest(downloadFileName, filePathDownload);
                         break;
                     case "delete":
-                        //TODO: deletes the file and send the object id to delete.
                         System.out.println("Enter a file name to delete from the server.");
                         String deleteFileName = in.nextLine();
                         coordinator.deleteImageRequest(deleteFileName);
