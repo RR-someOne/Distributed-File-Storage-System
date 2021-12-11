@@ -1,18 +1,19 @@
 package PAXOS;
 
-import com.healthmarketscience.rmiio.RemoteInputStream;
-import com.healthmarketscience.rmiio.RemoteInputStreamServer;
+//import com.healthmarketscience.rmiio.RemoteInputStream;
+//import com.healthmarketscience.rmiio.RemoteInputStreamClient;
+//import com.healthmarketscience.rmiio.RemoteInputStreamServer;
 
-import java.io.InputStream;
+import java.io.*;
 import java.rmi.NotBoundException;
-import java.rmi.Remote;
+//import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
-public class Coordinator extends java.rmi.server.UnicastRemoteObject implements ICordinator{
+public class Coordinator extends java.rmi.server.UnicastRemoteObject implements ICordinator, Serializable {
 
     private final static Logger LOGGER = Logger.getLogger(Coordinator.class.getName());
     private ArrayList<String> serverNames = new ArrayList<>();
@@ -32,8 +33,9 @@ public class Coordinator extends java.rmi.server.UnicastRemoteObject implements 
     }
 
 
+    //TODO: FAILED RMI SEND FILE BECAUSE USING SERVER RMI HERE
     @Override
-    public void phase_one(String requestType, RemoteInputStream file, String fileName) throws RemoteException{
+    public void phase_one(String requestType, String filePath, String fileName) throws RemoteException{
         // Need to send a message to all servers
         for(int i = 0; i < serverNames.size(); i ++ ) {
             try{
@@ -51,7 +53,7 @@ public class Coordinator extends java.rmi.server.UnicastRemoteObject implements 
         // Send a message to each server and check all responses for ok messages.
         for(IServer server : servers) {
             server.sendMessageToCoordinator("From server: " + server.getServerName(),
-                    UPLOAD, file, fileName);
+                    UPLOAD, filePath, fileName);
         }
         if(messages.contains("ABORT") || messages.size() != portNumbers.size()) {
             LOGGER.info("PHASE 1 WAS ABORTED.");
@@ -61,7 +63,7 @@ public class Coordinator extends java.rmi.server.UnicastRemoteObject implements 
         } else {
             LOGGER.info("PHASE 1 WAS SUCCESS.");
             // Start phase 2
-            phase_two(requestType, file, fileName);
+            phase_two(requestType, filePath, fileName);
             messages.clear();
             // Rememeber to also clear servers.
             servers.clear();
@@ -69,13 +71,13 @@ public class Coordinator extends java.rmi.server.UnicastRemoteObject implements 
     }
 
     @Override
-    public void phase_two(String requestType, RemoteInputStream file, String fileName) throws RemoteException{
+    public void phase_two(String requestType, String filePath, String fileName) throws RemoteException{
         switch (requestType) {
             case UPLOAD:
                 for(IServer server: servers) {
                     try {
-                        server.uploadToServer(file, fileName);
-                    } catch (Error e) {
+                        server.uploadToServer(filePath, fileName);
+                    } catch (Error | IOException e) {
                         LOGGER.info("Send upload request to the server failed.");
                         // TODO: NEED TO ADD A ROLL BACK FEATURE IN CASE A SERVER FAILS AFTER PHASE 1
                         break;
@@ -89,10 +91,21 @@ public class Coordinator extends java.rmi.server.UnicastRemoteObject implements 
         }
     }
 
+//    @Override
+//    public void uploadImageRequest(RemoteInputStream file, String fileName) throws IOException {
+//        // Start phase one here
+//        InputStream fileData = RemoteInputStreamClient.wrap(file);
+//        phase_one(UPLOAD, fileData, fileName);
+//    }
+
+
     @Override
-    public void uploadImageRequest(RemoteInputStream file, String fileName) throws RemoteException {
+    public void uploadImageRequest(String filePath, String fileName) throws IOException {
         // Start phase one here
-        phase_one(UPLOAD, file, fileName);
+        //InputStream fileData = RemoteInputStreamClient.wrap(file);
+       // InputStream file = new FileInputStream(new File(fileName));
+       // phase_one(UPLOAD, file, fileName);
+        phase_one(UPLOAD, filePath, fileName);
     }
 
     @Override

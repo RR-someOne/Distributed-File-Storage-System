@@ -1,11 +1,12 @@
 package PAXOS;
 
-import com.healthmarketscience.rmiio.RemoteInputStream;
-import com.healthmarketscience.rmiio.RemoteInputStreamServer;
-import com.healthmarketscience.rmiio.SimpleRemoteInputStream;
+//import com.healthmarketscience.rmiio.RemoteInputStream;
+//import com.healthmarketscience.rmiio.RemoteInputStreamServer;
+//import com.healthmarketscience.rmiio.SimpleRemoteInputStream;
 
 import java.io.*;
 import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Scanner;
@@ -14,7 +15,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-public class Client {
+public class Client implements Serializable{
+
+    public Client() throws RemoteException {
+        super();
+    }
 
     private final static Logger LOGGER = Logger.getLogger(Client.class.getName());
     private static String hostName;
@@ -25,10 +30,10 @@ public class Client {
    // private static InputStream file;
 
     // Wrapper to send input stream file, normal inputstream does not work here for rmi...
-    public static RemoteInputStreamServer parseFilePath(String filePath) throws FileNotFoundException {
+    public static InputStream parseFilePath(String filePath) throws FileNotFoundException {
         InputStream inputStream = new FileInputStream(new File(filePath));
-        RemoteInputStreamServer remoteFileData = new SimpleRemoteInputStream(inputStream);
-        return remoteFileData;
+      //  RemoteInputStreamServer remoteFileData = new SimpleRemoteInputStream(inputStream);
+        return inputStream;
     }
 
     public static void welcomeMessage(){
@@ -83,8 +88,16 @@ public class Client {
                         System.out.println("Now enter the fileName for the file.");
                         String fileName = in.nextLine();
                      //   InputStream file = parseFilePath(filePath);
-                        RemoteInputStreamServer file = parseFilePath(filePath);
-                        coordinator.uploadImageRequest(file.export(), fileName);
+                        InputStream file = parseFilePath(filePath);
+                        //TEST HERE
+                        try {
+                            //coordinator.uploadImageRequest(file.export(), fileName);
+                            coordinator.uploadImageRequest(filePath, fileName);
+                            System.out.println("SUCCESS test");
+                        } catch (Error e) {
+                            e.printStackTrace();
+                            System.out.println("Failed test here!!! ");
+                        }
                         // LEFT OFF HERE...
                         break;
                     case "download":

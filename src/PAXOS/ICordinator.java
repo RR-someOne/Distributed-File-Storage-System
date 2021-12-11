@@ -1,10 +1,11 @@
 package PAXOS;
 
-import com.healthmarketscience.rmiio.RemoteInputStream;
-import com.healthmarketscience.rmiio.RemoteInputStreamServer;
-
-import javax.crypto.KeyAgreement;
-import java.io.InputStream;
+//import com.healthmarketscience.rmiio.RemoteInputStream;
+//import com.healthmarketscience.rmiio.RemoteInputStreamServer;
+//
+//import javax.crypto.KeyAgreement;
+import java.io.IOException;
+//import java.io.InputStream;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
@@ -13,19 +14,20 @@ public interface ICordinator extends Remote {
     /**
      * Phase one of two phase commit.
      */
-    public void phase_one(String requestType, RemoteInputStream file, String fileName) throws RemoteException;
+    public void phase_one(String requestType, String filePath, String fileName) throws RemoteException;
 
     /**
      * Phase two of two phase commit.
      */
-    public void phase_two(String requestType, RemoteInputStream file, String fileName) throws RemoteException;
+    public void phase_two(String requestType, String filePath, String fileName) throws RemoteException;
 
     /**
      * sends an upload image request to coordinator.
      *
      * @throws RemoteException throws remote exception.
      */
-    public void uploadImageRequest(RemoteInputStream file, String fileName) throws RemoteException;
+   // public void uploadImageRequest(RemoteInputStream file, String fileName) throws IOException;
+    public void uploadImageRequest(String filePath, String fileName) throws IOException;
 
     /**
      * sends an download image request to coordinator.

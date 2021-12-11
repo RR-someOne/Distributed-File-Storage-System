@@ -1,7 +1,7 @@
 package PAXOS;
 
-import com.healthmarketscience.rmiio.RemoteInputStream;
-import com.healthmarketscience.rmiio.RemoteInputStreamServer;
+//import com.healthmarketscience.rmiio.RemoteInputStream;
+//import com.healthmarketscience.rmiio.RemoteInputStreamServer;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
@@ -13,19 +13,20 @@ import org.bson.types.ObjectId;
 
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-public class Crud extends java.rmi.server.UnicastRemoteObject implements ICrud{
+public class Crud extends java.rmi.server.UnicastRemoteObject implements ICrud, Serializable {
 
     public Crud() throws RemoteException {
         super();
     }
 
     @Override
-    public ObjectId upload(RemoteInputStream inputStream, String fileName, String databaseName) throws RemoteException {
+    public ObjectId upload(InputStream inputStream, String fileName, String databaseName) throws RemoteException {
         System.out.println("Calling upload...");
         String con = String.format("mongodb+srv://testUser:testUser@server1." +
                 "w54b6.mongodb.net/%s?retryWrites=true&w=majority", databaseName);

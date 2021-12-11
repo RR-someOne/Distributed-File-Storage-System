@@ -1,9 +1,9 @@
 package PAXOS;
 
-import com.healthmarketscience.rmiio.RemoteInputStream;
-import com.healthmarketscience.rmiio.RemoteInputStreamServer;
-
-import java.io.InputStream;
+//import com.healthmarketscience.rmiio.RemoteInputStream;
+//import com.healthmarketscience.rmiio.RemoteInputStreamServer;
+//
+//import java.io.InputStream;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
@@ -13,12 +13,11 @@ public interface IServer extends Remote {
      *
      * @param message
      * @param requestType
-     * @param file
      * @param fileName
      * @throws RemoteException
      */
     public void  sendMessageToCoordinator(String message, String requestType,
-                                          RemoteInputStream file, String fileName) throws RemoteException;
+                                          String filePath, String fileName) throws RemoteException;
 
     /**
      *
@@ -31,7 +30,7 @@ public interface IServer extends Remote {
      *
      * @throws RemoteException
      */
-    public void uploadToServer(RemoteInputStream file, String fileName) throws RemoteException;
+    public void uploadToServer(String filePath, String fileName) throws RemoteException;
 
     /**
      *

@@ -1,6 +1,6 @@
 package PAXOS;
 
-import com.healthmarketscience.rmiio.RemoteInputStream;
+//import com.healthmarketscience.rmiio.RemoteInputStream;
 import org.bson.types.ObjectId;
 
 import java.io.InputStream;
@@ -16,7 +16,7 @@ public interface ICrud extends java.rmi.Remote{
      * @return ObjectId of the file uploaded.
      * @throws RemoteException throws a remote exception.
      */
-    public ObjectId upload(RemoteInputStream inputStream, String fileName, String databaseName) throws RemoteException;
+    public ObjectId upload(InputStream inputStream, String fileName, String databaseName) throws RemoteException;
 
     /**
      * Downloads an image from the database.
