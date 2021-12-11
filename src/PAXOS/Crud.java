@@ -60,7 +60,7 @@ public class Crud extends java.rmi.server.UnicastRemoteObject implements ICrud, 
             MongoDatabase database = mongoClient.getDatabase(databaseName);
             GridFSBucket gridBucket = GridFSBuckets.create(database);
 
-            FileOutputStream fileOutputStream = new FileOutputStream(fileName);
+            FileOutputStream fileOutputStream = new FileOutputStream(outputString);
             gridBucket.downloadToStream(fileName, fileOutputStream);
             fileOutputStream.close();
 

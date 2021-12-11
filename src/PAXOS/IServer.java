@@ -50,6 +50,6 @@ public interface IServer extends Remote {
      *
      * @throws RemoteException
      */
-    public void downloadFromServer() throws RemoteException;
+    public void downloadFromServer(String fileName, String downloadImagePath) throws RemoteException;
 
 }

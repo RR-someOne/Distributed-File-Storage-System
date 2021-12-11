@@ -111,12 +111,21 @@ public class Server extends Crud implements Runnable, IServer, Serializable {
             LOGGER.info("Success, deleted the file from the server.");
         } catch (Error e) {
             LOGGER.info("Could not delete the file from the server.");
+        } catch (RemoteException e) {
+            LOGGER.info("Could not delete the file from the server.");
         }
     }
 
     @Override
-    public void downloadFromServer() throws RemoteException {
-
+    public void downloadFromServer(String fileName, String downloadFilePath) throws RemoteException {
+        try {
+            download(fileName, downloadFilePath, databaseName);
+            LOGGER.info("Success, downloaded from the server.");
+        } catch (Error e) {
+            LOGGER.info("Could not download the file from the server.");
+        } catch (RemoteException e) {
+            LOGGER.info("Could not download the file from the server.");
+        }
     }
 
     @Override

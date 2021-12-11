@@ -159,9 +159,25 @@ public class Coordinator extends java.rmi.server.UnicastRemoteObject implements 
     }
 
     @Override
-    public void downloadImageRequest(String fileName) throws RemoteException {
+    public void downloadImageRequest(String fileName, String downloadImagePath) throws RemoteException {
         // Does not change state so does not need 2 phase commit
-
+        for(int i = 0; i < serverNames.size(); i ++ ) {
+            try{
+                Registry registry = LocateRegistry.getRegistry(hostNames.get(i), portNumbers.get(i));
+                IServer server = (IServer) registry.lookup(serverNames.get(i));
+                server.downloadFromServer(fileName, downloadImagePath);
+                System.out.println("SUCCESS DOWNLOADED FROM SERVER");
+                break;
+            } catch (NotBoundException e) {
+                e.printStackTrace();
+                System.out.println("Registry is not bound from the coordinator phase one.");
+                continue;
+            } catch(RemoteException e) {
+                e.printStackTrace();
+                System.out.println("Coordinator throws a remote exception from phase one.");
+                continue;
+            }
+        }
     }
 
     @Override

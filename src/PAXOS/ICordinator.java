@@ -49,7 +49,7 @@ public interface ICordinator extends Remote {
      *
      * @throws RemoteException throws remote exception.
      */
-    public void downloadImageRequest(String fileName) throws RemoteException;
+    public void downloadImageRequest(String fileName, String filePathDownload) throws RemoteException;
 
     /**
      * sends an delete image request to coordinator.
