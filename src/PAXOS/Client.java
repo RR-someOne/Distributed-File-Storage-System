@@ -102,9 +102,15 @@ public class Client implements Serializable{
                         break;
                     case "download":
                         // TODO: send file name to download and send the file path to store the image.
+                        System.out.println("Please enter the fileName for the file to download.");
+                        String downloadFileName = in.nextLine();
+                        coordinator.downloadImageRequest(downloadFileName);
                         break;
                     case "delete":
                         //TODO: deletes the file and send the object id to delete.
+                        System.out.println("Enter a file name to delete from the server.");
+                        String deleteFileName = in.nextLine();
+                        coordinator.deleteImageRequest(deleteFileName);
                         break;
                 }
 

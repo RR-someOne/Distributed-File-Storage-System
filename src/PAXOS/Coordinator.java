@@ -71,6 +71,43 @@ public class Coordinator extends java.rmi.server.UnicastRemoteObject implements 
     }
 
     @Override
+    public void phase_one_delete(String requestType, String fileName) throws RemoteException {
+        // Need to send a message to all servers
+        for(int i = 0; i < serverNames.size(); i ++ ) {
+            try{
+                Registry registry = LocateRegistry.getRegistry(hostNames.get(i), portNumbers.get(i));
+                IServer server = (IServer) registry.lookup(serverNames.get(i));
+                servers.add(server);
+            } catch (NotBoundException e) {
+                e.printStackTrace();
+                System.out.println("Registry is not bound from the coordinator phase one.");
+            } catch(RemoteException e) {
+                e.printStackTrace();
+                System.out.println("Coordinator throws a remote exception from phase one.");
+            }
+        }
+        // Send a message to each server and check all responses for ok messages.
+        for(IServer server : servers) {
+            server.sendMessageToCoordinatorForDelete("From server: " + server.getServerName(),
+                    fileName);
+        }
+        if(messages.contains("ABORT") || messages.size() != portNumbers.size()) {
+            LOGGER.info("PHASE 1 WAS ABORTED.");
+            messages.clear();
+            // Rememeber to also clear servers.
+            servers.clear();
+        } else {
+            LOGGER.info("PHASE 1 WAS SUCCESS.");
+            // Start phase 2
+            phaseTwoDelete(fileName);
+           // phase_two(requestType, filePath, fileName);
+            messages.clear();
+            // Rememeber to also clear servers.
+            servers.clear();
+        }
+    }
+
+    @Override
     public void phase_two(String requestType, String filePath, String fileName) throws RemoteException{
         switch (requestType) {
             case UPLOAD:
@@ -88,6 +125,19 @@ public class Coordinator extends java.rmi.server.UnicastRemoteObject implements 
                 break;
             case DELETE:
                 break;
+        }
+    }
+
+    @Override
+    public void phaseTwoDelete(String fileName) throws RemoteException {
+        for (IServer server : servers) {
+            try {
+                server.deleteFromServer(fileName);
+            } catch (Error | IOException e) {
+                LOGGER.info("Send upload request to the server failed.");
+                // TODO: NEED TO ADD A ROLL BACK FEATURE IN CASE A SERVER FAILS AFTER PHASE 1
+                break;
+            }
         }
     }
 
@@ -109,13 +159,15 @@ public class Coordinator extends java.rmi.server.UnicastRemoteObject implements 
     }
 
     @Override
-    public void downloadImageRequest() throws RemoteException {
+    public void downloadImageRequest(String fileName) throws RemoteException {
         // Does not change state so does not need 2 phase commit
+
     }
 
     @Override
-    public void deleteImageRequest() throws RemoteException {
+    public void deleteImageRequest(String deleteFileName) throws RemoteException {
         // Start phase one here
+        phase_one_delete(DELETE, deleteFileName);
     }
 
     @Override

@@ -4,10 +4,14 @@ package PAXOS;
 //import com.healthmarketscience.rmiio.RemoteInputStreamServer;
 //import jdk.swing.interop.SwingInterOpUtils;
 
+import org.bson.types.ObjectId;
+
 import java.io.*;
 import java.rmi.RemoteException;
 //import java.rmi.registry.LocateRegistry;
 //import java.rmi.registry.Registry;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 public class Server extends Crud implements Runnable, IServer, Serializable {
@@ -16,6 +20,7 @@ public class Server extends Crud implements Runnable, IServer, Serializable {
     private  ICordinator cordinator;
     private String serverName;
     private String databaseName;
+    private HashMap<String, ObjectId> cache = new HashMap<>();
 
     public Server(ICordinator cordinator, String serverName, String databaseName) throws RemoteException {
         this.cordinator = cordinator;
@@ -45,6 +50,16 @@ public class Server extends Crud implements Runnable, IServer, Serializable {
         }
     }
 
+    @Override
+    public void sendMessageToCoordinatorForDelete(String message, String fileName) throws RemoteException {
+        try {
+            LOGGER.info("SUCCESS CAN UPLOAD FROM SERVER." + message);
+            cordinator.sendBackMessageToCoordintor("OK");
+        } catch (Error e) {
+            LOGGER.info("Aborted" + message);
+            cordinator.sendBackMessageToCoordintor("ABORT");
+        }
+    }
 
 
 //    @Override
@@ -77,16 +92,26 @@ public class Server extends Crud implements Runnable, IServer, Serializable {
     public void uploadToServer(String filePath, String fileName) throws RemoteException {
         try {
             InputStream file = new FileInputStream(new File(filePath));
-            upload(file, fileName, databaseName);
+            ObjectId id = upload(file, fileName, databaseName);
+            cache.put(fileName, id);
             LOGGER.info("Success, uploaded the file to the server.");
         } catch (Error | FileNotFoundException e) {
             LOGGER.info("Could not upload the file to the server.");
+            cache.remove(fileName);
+        } catch(RemoteException e) {
+            LOGGER.info("Could not upload the file to the server. Remote Exception.");
+            cache.remove(fileName);
         }
     }
 
     @Override
-    public void deleteFromServer() throws RemoteException {
-
+    public void deleteFromServer(String fileName) throws RemoteException {
+        try {
+            delete(cache.get(fileName), databaseName);
+            LOGGER.info("Success, deleted the file from the server.");
+        } catch (Error e) {
+            LOGGER.info("Could not delete the file from the server.");
+        }
     }
 
     @Override

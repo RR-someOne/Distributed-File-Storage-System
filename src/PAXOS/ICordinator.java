@@ -12,9 +12,15 @@ import java.rmi.RemoteException;
 public interface ICordinator extends Remote {
 
     /**
-     * Phase one of two phase commit.
+     * Phase one of two phase commit for upload.
      */
     public void phase_one(String requestType, String filePath, String fileName) throws RemoteException;
+
+    /**
+     * Phase one of twe phase commit for delete.
+     */
+    public void phase_one_delete(String requestType, String fileName) throws RemoteException;
+
 
     /**
      * Phase two of two phase commit.
@@ -22,11 +28,20 @@ public interface ICordinator extends Remote {
     public void phase_two(String requestType, String filePath, String fileName) throws RemoteException;
 
     /**
+     *
+     * @param fileName
+     * @throws RemoteException
+     */
+    public void phaseTwoDelete(String fileName) throws RemoteException;
+
+
+    /**
      * sends an upload image request to coordinator.
      *
      * @throws RemoteException throws remote exception.
      */
    // public void uploadImageRequest(RemoteInputStream file, String fileName) throws IOException;
+
     public void uploadImageRequest(String filePath, String fileName) throws IOException;
 
     /**
@@ -34,14 +49,14 @@ public interface ICordinator extends Remote {
      *
      * @throws RemoteException throws remote exception.
      */
-    public void downloadImageRequest() throws RemoteException;
+    public void downloadImageRequest(String fileName) throws RemoteException;
 
     /**
      * sends an delete image request to coordinator.
      *
      * @throws RemoteException throws remote exception.
      */
-    public void deleteImageRequest() throws RemoteException;
+    public void deleteImageRequest(String deleteFileName) throws RemoteException;
 
     /**
      * Sends a message to the client.

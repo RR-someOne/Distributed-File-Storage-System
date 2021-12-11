@@ -21,6 +21,14 @@ public interface IServer extends Remote {
 
     /**
      *
+     * @param message
+     * @param fileName
+     * @throws RemoteException
+     */
+    public void sendMessageToCoordinatorForDelete(String message, String fileName) throws RemoteException;
+
+    /**
+     *
      * @return
      * @throws RemoteException
      */
@@ -36,7 +44,7 @@ public interface IServer extends Remote {
      *
      * @throws RemoteException
      */
-    public void deleteFromServer() throws RemoteException;
+    public void deleteFromServer(String fileName) throws RemoteException;
 
     /**
      *
